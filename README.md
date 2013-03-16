@@ -15,7 +15,7 @@ info = gimme-deps 'path to some file or module'
 info is the flat list of packages that were used in module sources :
 
 ``` coffee
-# pseudo data-structure (coffeescript)
+# pseudo data structure (coffeescript)
 
 packages:
 [
