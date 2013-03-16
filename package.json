@@ -1,0 +1,29 @@
+{
+  "name": "gimme-deps",
+  "version": "0.0.0",
+  "description": "Package for resolving require dependencies from node modules",
+  "main": "lib-js/index.js",
+  "scripts": {
+    "postinstall": "cake build"
+  },
+  
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AlexMost/gimme-deps"
+  },
+
+  "dependencies":{
+  	"resolve": "~0.3.0",
+  	"detective": "~2.0.0"
+  },
+
+  "devDependencies": {
+	"nodeunit": "*"
+  },
+
+  "keywords": ["resolve", "require", "dependencies",
+  "parse node module deps", "get require deps"],
+  "author": "Alexander Mostovenko",
+  "license": "BSD",
+  "readmeFilename": "README.md"
+}
