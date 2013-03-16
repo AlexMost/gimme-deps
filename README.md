@@ -11,7 +11,7 @@ npm install gimme-deps
 ## Usage
 
 ``` coffeescript
-gimme-deps('path to some file or module') (err, info) ->
+gimme-deps 'path to some file or module', (err, info) ->
 	# processing info data
 
 ```
