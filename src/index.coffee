@@ -14,8 +14,9 @@ get_from_file = (file_path, resolved_requires, module, get_deps_cb) ->
 			# TODO: check if relative or npm module require
 			if relative_pattern.test
 				{module, callee, path:"#{(path.join (path.dirname file_path), callee)}.js"}
-			else
-				_path = resolve_npm_mod_folder callee, path.dirname filepath
+			#else
+			#	resolve_npm_mod_folder callee, (path.dirname filepath), (err, dirname) ->
+			#		#get_from_module dirname, resolved_requires, get_deps_cb
 
 		if requires.length
 			resolved_requires = (resolved_requires.concat requires).reduce unique_red, []
@@ -31,7 +32,7 @@ get_from_file = (file_path, resolved_requires, module, get_deps_cb) ->
 			get_deps_cb err, resolved_requires
 
 
-get_from_module = (_path, gimme_cb) ->
+get_from_module = (_path, resolved, gimme_cb) ->
 	npm_module_path = path.resolve _path
 	package_json_path = path.join _path, "package.json"
 	
@@ -39,14 +40,14 @@ get_from_module = (_path, gimme_cb) ->
 		package_json = JSON.parse package_json.toString()
 		module = package_json.name
 		main_file = path.join _path, package_json.main
-		get_from_file main_file, [], module, (err, data) ->
+		get_from_file main_file, resolved, module, (err, data) ->
 			gimme_cb err, data
 
 
 gimme_deps = (_path, gimme_cb) ->
 	is_dir _path, (err, isdir) ->
 		if isdir is true
-			get_from_module _path, gimme_cb
+			get_from_module _path, [], gimme_cb
 		else
 			get_from_file _path, [], "", gimme_cb
 

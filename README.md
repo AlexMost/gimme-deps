@@ -35,3 +35,4 @@ info is the flat list of resolved files with their metadata:
 ```
 
 And thats it, no wrapping, no bundling only required modules and their metadata.
+You can process them as you want - bundle, wrapp, analize e.t.c.
