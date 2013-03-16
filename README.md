@@ -8,11 +8,15 @@ just make:
 npm install gimme-deps
 ```
 
+## Usage
+
 ``` coffeescript
-info = gimme-deps 'path to some file or module'
+gimme-deps('path to some file or module') (err, info) ->
+	# processing info data
+
 ```
 
-info is the flat list of packages that were used in module sources :
+info is the flat list of resolved files and modules :
 
 ``` coffee
 # pseudo data structure (coffeescript)
