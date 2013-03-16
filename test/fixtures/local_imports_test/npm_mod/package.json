@@ -1,0 +1,4 @@
+{
+  "name": "npm_mod",
+  "main": "./lib/index.js"
+}
