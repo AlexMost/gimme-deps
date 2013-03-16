@@ -15,19 +15,26 @@ info = gimme-deps 'path to some file or module'
 info is the flat list of packages that were used in module sources :
 
 ``` coffee
+# pseudo data-structure (coffeescript)
 
 packages:
 [
 	"module_name":{                                     
-	"packagejson":                                      
-	files:[                                             #  module files
-		"./file_name": "/file/path/absolute/filename"   #  <require statement> : file absolute path
+		"packagejson":                                      
+		files:[                                             #  module files
+			"./file_name": "/file/path/absolute/filename"   #  <require statement> : file absolute path
 
-		# ...
-		]
+			# ... other files
+			]
 	},
 
-	# ...
+	# ... other packages
+]
+
+files: [                                             #  module files
+		"./file_name": "/file/path/absolute/filename"   #  <require statement> : file absolute path
+
+		# ... other files
 ]
 
 ```
