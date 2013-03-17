@@ -2,7 +2,7 @@ detective = require 'detective'
 path = require 'path'
 fs = require 'fs'
 async = require 'async'
-{is_dir, resolve_npm_mod_folder, unique_red, flatten, partial} = require './utils'
+{is_dir, resolve_npm_mod_folder, flatten, partial} = require './utils'
 
 local_pattern = /^\.\.?(\/|$)/
 
@@ -23,7 +23,6 @@ unique_reducer = (a, b) ->
 	else a.concat b
 
 
-# TODO: return in format {mod_name, filepath, module}
 get_from_file = (file_path, resolved_requires, module, get_deps_cb) ->
 	require_processor =  (callee, cb) ->
 		if local_pattern.test callee

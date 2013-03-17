@@ -52,6 +52,4 @@ resolve_npm_mod_folder = (callee, dirname, cb) ->
 		cb err, module_dir
 
 
-unique_red = (a, b) -> if b in a then a else a.concat b
-
 module.exports = {is_dir, resolve_npm_mod_folder, unique_red, flatten, partial}

@@ -1,12 +1,12 @@
 {
   "name": "gimme-deps",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Package for resolving require dependencies from node modules",
   "main": "lib-js/index.js",
   "scripts": {
     "postinstall": "cake build"
   },
-  
+
   "repository": {
     "type": "git",
     "url": "https://github.com/AlexMost/gimme-deps"
@@ -14,7 +14,8 @@
 
   "dependencies":{
   	"resolve": "~0.3.0",
-  	"detective": "~2.0.0"
+  	"detective": "~2.0.0",
+  	"async": "~0.2.6"
   },
 
   "devDependencies": {
