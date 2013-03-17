@@ -2,6 +2,25 @@ resolve = require 'resolve'
 fs = require 'fs'
 path = require 'path'
 
+partial = (fn) ->
+        partial_args = Array::slice.call arguments
+        partial_args.shift()
+        ->
+            [new_args, arg] = [[], 0]
+            for a, i in partial_args
+                new_args.push(
+                    unless partial_args[i] then arguments[arg++] else partial_args[i])
+            fn.apply this, new_args
+
+
+flatten = (array, results = []) ->
+    for item in array
+        if Array.isArray(item)
+            flatten(item, results)
+        else
+            results.push(item)
+
+    results
 
 is_dir = (fn, cb) ->
     fs.lstat fn, (err, stat) ->
@@ -35,4 +54,4 @@ resolve_npm_mod_folder = (callee, dirname, cb) ->
 
 unique_red = (a, b) -> if b in a then a else a.concat b
 
-module.exports = {is_dir, resolve_npm_mod_folder, unique_red}
+module.exports = {is_dir, resolve_npm_mod_folder, unique_red, flatten, partial}

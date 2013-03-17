@@ -1,35 +1,57 @@
 detective = require 'detective'
 path = require 'path'
 fs = require 'fs'
-{is_dir, resolve_npm_mod_folder, unique_red} = require './utils'
+async = require 'async'
+{is_dir, resolve_npm_mod_folder, unique_red, flatten, partial} = require './utils'
 
-relative_pattern = /^\.\.?(\/|$)/
+local_pattern = /^\.\.?(\/|$)/
+
+
+process_local_require = (module, path, callee, cb) ->  
+	cb undefined, {module, callee, path}
+
+
+process_module_require = (module, _path, resolved_requires, callee, cb) ->
+	resolve_npm_mod_folder callee, (path.dirname _path), (err, dirname) ->
+		get_from_module dirname, resolved_requires, cb
+
+
+unique_reducer = (a, b) -> 
+	has_item = a.filter((i) -> i.path is b.path).length > 0
+	if has_item
+		a
+	else a.concat b
 
 
 # TODO: return in format {mod_name, filepath, module}
 get_from_file = (file_path, resolved_requires, module, get_deps_cb) ->
+	require_processor =  (callee, cb) ->
+		if local_pattern.test callee
+			process_local_require module, (path.join (path.dirname file_path), callee) + ".js", callee, cb
+		else
+			process_module_require module, (path.join (path.dirname file_path), callee) + ".js", resolved_requires, callee, cb
+
+	rec_func = (m, cb) ->
+		get_from_file m.path, resolved_requires, module, cb
+
 	fs.readFile file_path, (err, data) ->
 		data = data.toString()
-		requires = (detective data).map (callee) ->
-			# TODO: check if relative or npm module require
-			if relative_pattern.test
-				{module, callee, path:"#{(path.join (path.dirname file_path), callee)}.js"}
-			#else
-			#	resolve_npm_mod_folder callee, (path.dirname filepath), (err, dirname) ->
-			#		#get_from_module dirname, resolved_requires, get_deps_cb
+
+		requires = (detective data).filter((a) -> 
+			resolved_requires.filter((r) -> r.path is path.join(file_path, a)).length is 0)
 
 		if requires.length
-			resolved_requires = (resolved_requires.concat requires).reduce unique_red, []
+			async.map requires, require_processor, (err, result) ->
 
-			reducer = (a, b) ->  
-				get_from_file b.path, a, module, (err, data) ->
-					if data?
-						get_deps_cb err, data
+				result = flatten(result).filter((a) -> 
+					resolved_requires.filter((r) -> r.path is a.path).length is 0)
 
-			requires.reduce reducer, resolved_requires
+				resolved_requires = flatten(resolved_requires.concat result)
 
+				async.map result, rec_func, (err, result) ->
+					get_deps_cb err, flatten(result).reduce unique_reducer, []
 		else
-			get_deps_cb err, resolved_requires
+			get_deps_cb err, flatten(resolved_requires)
 
 
 get_from_module = (_path, resolved, gimme_cb) ->
@@ -40,8 +62,11 @@ get_from_module = (_path, resolved, gimme_cb) ->
 		package_json = JSON.parse package_json.toString()
 		module = package_json.name
 		main_file = path.join _path, package_json.main
+		if (path.extname main_file) is ''
+			main_file = "#{main_file}.js"
+		resolved = resolved.concat [{module, path: main_file, callee: module}]
 		get_from_file main_file, resolved, module, (err, data) ->
-			gimme_cb err, data
+			gimme_cb err, flatten(data)
 
 
 gimme_deps = (_path, gimme_cb) ->
