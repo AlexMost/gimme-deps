@@ -12,7 +12,6 @@ process_local_require = (module, path, callee, cb) ->
 
 process_module_require = (_path, resolved_requires, callee, cb) ->
 	resolve_npm_mod_folder callee, (path.dirname _path), (err, dirname) ->
-		console.log _path, dirname, callee
 		get_from_module dirname, resolved_requires, cb
 
 
