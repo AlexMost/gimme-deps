@@ -29,5 +29,12 @@ exports.test_resolve_from_module_with_node_modules_deps = (test) ->
 		info.map (m) -> 
 			fn = (path.basename m.path)
 			test.ok fn in etalon_filenames, "Not all files were parsed from npm module #{fn}"
-		
+
 		test.done()
+
+
+exports.test_resolve_from_node_modules_folder = (test) ->
+	gdeps (path.join fixtures_path, "modules_imports_test/node_modules/optimist"), (err, info) ->
+		console.log info
+		test.done()
+

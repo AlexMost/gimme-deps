@@ -1,6 +1,9 @@
 resolve = require 'resolve'
 fs = require 'fs'
 path = require 'path'
+async = require 'async'
+
+local_pattern = /^\.\.?(\/|$)/
 
 partial = (fn) ->
         partial_args = Array::slice.call arguments
@@ -22,12 +25,35 @@ flatten = (array, results = []) ->
 
     results
 
+
 is_dir = (fn, cb) ->
     fs.lstat fn, (err, stat) ->
         if err
             cb err, false
         else
             cb err, stat.isDirectory()
+
+
+is_local_require = (callee, _path, is_local_cb) ->
+
+	_is_match_local = (callee, cb) -> cb null, local_pattern.test callee
+
+	_exists_local = (callee, cb) ->
+		fs.exists (path.join _path, "./#{callee}.js"), (exists) ->
+			cb null, exists
+
+	async.parallel(
+		[
+			partial(_is_match_local, callee, undefined)
+			#partial(_exists_local, callee, undefined)
+		]
+
+		(err, results) ->
+			result = results.reduce (a, b) -> a or b
+			is_local_cb err, result
+
+		)
+
 
 resolve_npm_mod_folder = (callee, dirname, cb) ->
 
@@ -52,4 +78,4 @@ resolve_npm_mod_folder = (callee, dirname, cb) ->
 		cb err, module_dir
 
 
-module.exports = {is_dir, resolve_npm_mod_folder, unique_red, flatten, partial}
+module.exports = {is_dir, resolve_npm_mod_folder, flatten, partial, is_local_require}
