@@ -71,8 +71,14 @@ get_from_module = (_path, resolved, gimme_cb) ->
 	
 	fs.readFile package_json_path, (err, package_json) ->
 		package_json = JSON.parse package_json.toString()
+
 		module = package_json.name
+
+		unless package_json.main
+			return gimme_cb "Failded to retrive deps from #{module}. Missing main section in package_json"
+		
 		main_file = path.join _path, package_json.main
+
 		if (path.extname main_file) is ''
 			main_file = "#{main_file}.js"
 		resolved = resolved.concat [{module, path: main_file, callee: module}]
