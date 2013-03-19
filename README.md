@@ -16,21 +16,7 @@ gimme-deps 'path to some file or module', (err, info) ->
 
 ```
 
-info is the flat list of resolved files with their metadata:
-
-``` coffee
-# pseudo data structure (coffeescript)
-[
-	{                                     
-		module: "module name",
-		module_path: "module path"
-		package_json: "package json path"
-		callee: "parsed require call"
-		path: "filepath"
-	},
-
-	# ... other files
-]
+info is the flat list of resolved packages with files with their metadata:
 
 ```
 
