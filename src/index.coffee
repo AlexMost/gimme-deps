@@ -2,13 +2,11 @@ detective = require 'detective'
 path = require 'path'
 fs = require 'fs'
 async = require 'async'
-{is_dir, resolve_npm_mod_folder, flatten, partial, is_local_require} = require './utils'
+{is_dir, resolve_npm_mod_folder, flatten, partial, is_local_require, extend} = require './utils'
 
-# TODO: get modules base dir
-# TODO: pointer to main file
+# TODO: dela with resolving global objects such as path, fs e.t.c
 
-
-process_local_require = (module, path, callee, cb) ->  
+process_local_require = (module, path, callee, main_file, cb) ->  
 	cb undefined, {module, callee, path}
 
 
@@ -17,7 +15,7 @@ process_module_require = (_path, resolved_requires, callee, cb) ->
 		unless err
 			get_from_module dirname, resolved_requires, cb
 		else
-			console.log err
+			#console.log err
 			cb()
 
 
@@ -37,6 +35,7 @@ get_from_file = (file_path, resolved_requires, module, get_deps_cb) ->
 					module
 					path.normalize (path.join (path.dirname file_path), callee) + ".js"
 					callee
+					file_path
 					cb)
 			else
 				process_module_require(
@@ -86,15 +85,36 @@ get_from_module = (_path, resolved, gimme_cb) ->
 
 		if (path.extname main_file) is ''
 			main_file = "#{main_file}.js"
-		resolved = resolved.concat [{module, path: main_file, callee: module}]
+		resolved = resolved.concat [
+			{module, path: main_file, callee: module, main_file, module_path:_path, package_json}
+			]
 		get_from_file main_file, resolved, module, (err, data) ->
 			gimme_cb err, flatten(data)
 
 
 gimme_deps = (_path, gimme_cb) ->
+	reduce_in_packages = (a, b) ->
+		mod_file = {path: b.path, callee: b.callee}
+
+		unless b.module of a
+			pack = {files : [mod_file]}
+			a[b.module] = extend pack, b
+		else
+			a[b.module] = extend a[b.module], b
+			a[b.module].files.push mod_file
+
+		delete a[b.module].path
+		delete a[b.module].callee
+		a
+
 	is_dir _path, (err, isdir) ->
 		if isdir is true
-			get_from_module _path, [], gimme_cb
+			get_from_module _path, [], (err, info) ->
+
+				unless err?
+					info = info.reduce reduce_in_packages, {}
+				res_list = (v for k, v of info)
+				gimme_cb err, res_list
 		else
 			get_from_file _path, [], "", gimme_cb
 

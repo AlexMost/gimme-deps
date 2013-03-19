@@ -82,5 +82,25 @@ resolve_npm_mod_folder = (callee, dirname, cb) ->
 
 			cb err, module_dir
 
+is_object = (v) ->
+    try
+        if v.toString() is '[object Object]' then true else false
+    catch e
+        false
 
-module.exports = {is_dir, resolve_npm_mod_folder, flatten, partial, is_local_require}
+extend = (a, b) ->
+    unless (is_object a) and (is_object b)
+        throw "Arguments type mismatch: #{a}, #{b}"
+
+    ret = {}
+    for k,v of a
+        ret[k] = v
+
+    for k, v of b
+        ret[k] = if ret[k] and is_object ret[k]
+            extend a[k], v
+        else
+            v
+    ret
+
+module.exports = {is_dir, resolve_npm_mod_folder, flatten, partial, is_local_require, extend}
