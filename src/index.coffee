@@ -4,7 +4,9 @@ fs = require 'fs'
 async = require 'async'
 {is_dir, resolve_npm_mod_folder, flatten, partial, is_local_require} = require './utils'
 
-# TODO: dela with resolving global objects such as path, fs e.t.c
+# TODO: get modules base dir
+# TODO: pointer to main file
+
 
 process_local_require = (module, path, callee, cb) ->  
 	cb undefined, {module, callee, path}
