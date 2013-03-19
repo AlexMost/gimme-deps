@@ -56,7 +56,6 @@ is_local_require = (callee, _path, is_local_cb) ->
 
 
 resolve_npm_mod_folder = (callee, dirname, cb) ->
-
 	after_val_reducer = (val) ->
 		(a, b) ->
 			if val in a or b is val
@@ -64,18 +63,24 @@ resolve_npm_mod_folder = (callee, dirname, cb) ->
 	    	else
 	        	a
 
-	resolve callee, {basedir: dirname}, (err, result) ->
-		# TODO handle error
-		rel_module_dir = result.split('node_modules')[-1..][0]
-		rel_module_dir_name = ((rel_module_dir.split path.sep).filter (i) -> i isnt '')[0]
+	resolve callee, {basedir: path.resolve(dirname)}, (err, result) ->
+		unless result?
+			return cb "Module #{callee} was not resolved #{dirname}", null
+		fs.exists result, (exists) ->
+			# TODO handle error
+			if exists is true
+				rel_module_dir = result.split('node_modules')[-1..][0]
+				rel_module_dir_name = ((rel_module_dir.split path.sep).filter (i) -> i isnt '')[0]
 
-		module_dir = result.split(path.sep)
-						   .reverse()
-						   .reduce((after_val_reducer rel_module_dir_name), [])
-						   .reverse()
-						   .join(path.sep)
+				module_dir = result.split(path.sep)
+								   .reverse()
+								   .reduce((after_val_reducer rel_module_dir_name), [])
+								   .reverse()
+								   .join(path.sep)
+			else
+				err = "Module #{callee} was not resolved from #{dirname}"
 
-		cb err, module_dir
+			cb err, module_dir
 
 
 module.exports = {is_dir, resolve_npm_mod_folder, flatten, partial, is_local_require}

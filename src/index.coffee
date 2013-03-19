@@ -12,7 +12,11 @@ process_local_require = (module, path, callee, cb) ->
 
 process_module_require = (_path, resolved_requires, callee, cb) ->
 	resolve_npm_mod_folder callee, (path.dirname _path), (err, dirname) ->
-		get_from_module dirname, resolved_requires, cb
+		unless err
+			get_from_module dirname, resolved_requires, cb
+		else
+			console.log err
+			cb()
 
 
 unique_reducer = (a, b) -> 
@@ -43,7 +47,7 @@ get_from_file = (file_path, resolved_requires, module, get_deps_cb) ->
 		get_from_file m.path, resolved_requires, module, cb
 
 	fs.readFile file_path, (err, data) ->
-		get_deps_cb("Failed to read file #{file_path}, #{err}", null) if err
+		return get_deps_cb(null, []) if err?
 
 		data = data.toString()
 
@@ -52,9 +56,9 @@ get_from_file = (file_path, resolved_requires, module, get_deps_cb) ->
 
 		if requires.length
 			async.map requires, require_processor, (err, result) ->
-
-				result = flatten(result).filter((a) -> 
-					resolved_requires.filter((r) -> r.path is a.path).length is 0)
+				result = flatten(result).filter (r) -> r?
+				result = result.filter((a) -> resolved_requires.filter(
+					(r) -> r.path is a.path).length is 0)
 
 				resolved_requires = flatten(resolved_requires.concat result)
 
