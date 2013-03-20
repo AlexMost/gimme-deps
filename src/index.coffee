@@ -4,8 +4,6 @@ fs = require 'fs'
 async = require 'async'
 {is_dir, resolve_npm_mod_folder, flatten, partial, is_local_require, extend} = require './utils'
 
-# TODO: dela with resolving global objects such as path, fs e.t.c
-
 process_local_require = (module, path, callee, main_file, cb) ->  
 	cb undefined, {module, callee, path}
 
@@ -15,7 +13,6 @@ process_module_require = (_path, resolved_requires, callee, cb) ->
 		unless err
 			get_from_module dirname, resolved_requires, cb
 		else
-			#console.log err
 			cb()
 
 
@@ -58,13 +55,17 @@ get_from_file = (file_path, resolved_requires, module, get_deps_cb) ->
 		if requires.length
 			async.map requires, require_processor, (err, result) ->
 				result = flatten(result).filter (r) -> r?
-				result = result.filter((a) -> resolved_requires.filter(
-					(r) -> r.path is a.path).length is 0)
+				result = result.filter((a) -> 
+					resolved_requires.filter((r) -> r.path is a.path).length is 0)
 
 				resolved_requires = flatten(resolved_requires.concat result)
 
-				async.map result, rec_func, (err, result) ->
-					get_deps_cb err, flatten(result).reduce unique_reducer, []
+				if result.length
+					async.map result, rec_func, (err, _result) ->
+						get_deps_cb err, flatten(_result).reduce unique_reducer, []
+				else
+					get_deps_cb err, resolved_requires
+
 		else
 			get_deps_cb err, flatten(resolved_requires)
 
@@ -85,9 +86,11 @@ get_from_module = (_path, resolved, gimme_cb) ->
 
 		if (path.extname main_file) is ''
 			main_file = "#{main_file}.js"
+
 		resolved = resolved.concat [
 			{module, path: main_file, callee: module, main_file, module_path:_path, package_json}
 			]
+
 		get_from_file main_file, resolved, module, (err, data) ->
 			gimme_cb err, flatten(data)
 
@@ -110,7 +113,6 @@ gimme_deps = (_path, gimme_cb) ->
 	is_dir _path, (err, isdir) ->
 		if isdir is true
 			get_from_module _path, [], (err, info) ->
-
 				unless err?
 					info = info.reduce reduce_in_packages, {}
 				res_list = (v for k, v of info)

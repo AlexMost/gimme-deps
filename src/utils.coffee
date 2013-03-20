@@ -78,8 +78,7 @@ resolve_npm_mod_folder = (callee, dirname, cb) ->
 								   .reverse()
 								   .join(path.sep)
 			else
-				err = "Module #{callee} was not resolved from #{dirname}"
-
+				return cb "Module #{callee} was not resolved from #{dirname}", null
 			cb err, module_dir
 
 is_object = (v) ->

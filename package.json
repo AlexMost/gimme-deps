@@ -1,6 +1,6 @@
 {
   "name": "gimme-deps",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Package for resolving require dependencies from node modules",
   "main": "lib-js/index.js",
   "scripts": {
@@ -29,8 +29,5 @@
     "name": "Alexander Mostovenko"
   },
   "license": "BSD",
-  "readmeFilename": "README.md",
-  "readme": "gimme-deps\n==========\n\nIf you want to know what files are required from node module or just simple file, their absolute file pahts, their package names and another metadata from package.json`s\njust make:\n\n``` sh\nnpm install gimme-deps\n```\n\n## Usage\n\n``` coffeescript\ngimme-deps 'path to some file or module', (err, info) ->\n\t# processing info data\n\n```\n\ninfo is the flat list of resolved files with their metadata:\n\n``` coffee\n# pseudo data structure (coffeescript)\n[\n\t{                                     \n\t\tmodule: \"module name\",\n\t\tmodule_path: \"module path\"\n\t\tpackage_json: \"package json path\"\n\t\tcallee: \"parsed require call\"\n\t\tpath: \"filepath\"\n\t},\n\n\t# ... other files\n]\n\n```\n\nAnd thats it, no wrapping, no bundling only required modules and their metadata.\nYou can process them as you want - bundle, wrapp, analize e.t.c.",
-  "_id": "gimme-deps@0.0.5",
-  "_from": "gimme-deps@"
+  "readmeFilename": "README.md"
 }
