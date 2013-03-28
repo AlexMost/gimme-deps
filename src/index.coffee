@@ -5,7 +5,7 @@ async = require 'async'
 {is_dir, resolve_npm_mod_folder, flatten, partial, is_local_require, extend} = require './utils'
 
 process_local_require = (module, path, callee, main_file, cb) ->  
-	cb undefined, {module, callee, path}
+	cb undefined, {module, callee, path, main_file}
 
 
 process_module_require = (_path, resolved_requires, callee, cb) ->
@@ -97,26 +97,35 @@ get_from_module = (_path, resolved, gimme_cb) ->
 
 gimme_deps = (_path, gimme_cb) ->
 	reduce_in_packages = (a, b) ->
+
 		mod_file = {path: b.path, callee: b.callee}
 
-		unless b.module of a
-			pack = {files : [mod_file]}
-			a[b.module] = extend pack, b
-		else
-			a[b.module] = extend a[b.module], b
-			a[b.module].files.push mod_file
+		delete b.path
+		delete b.callee
 
-		delete a[b.module].path
-		delete a[b.module].callee
+		mod_names = a.map (a) -> a.module
+
+		unless b.module in mod_names
+			pack = {files : [mod_file]}
+			a.push extend pack, b
+		else
+			[mod] = a.filter (m) -> (m.module is b.module) and (b.main_file is m.main_file)
+		
+			if mod
+				for mod in a
+					if (mod.module is b.module) and (mod.main_file is b.main_file)
+						mod.files.push mod_file
+			else
+				pack = {files : [mod_file]}
+				a.push extend pack, b
 		a
 
 	is_dir _path, (err, isdir) ->
 		if isdir is true
 			get_from_module _path, [], (err, info) ->
-				unless err?
-					info = info.reduce reduce_in_packages, {}
-				res_list = (v for k, v of info)
-				gimme_cb err, res_list
+				info = info.reduce reduce_in_packages, []
+				#res_list = (v for k, v of info)
+				gimme_cb err, info
 		else
 			get_from_file _path, [], "", gimme_cb
 
