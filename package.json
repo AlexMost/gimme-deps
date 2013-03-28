@@ -1,6 +1,6 @@
 {
   "name": "gimme-deps",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Package for resolving require dependencies from node modules",
   "main": "lib-js/index.js",
   "scripts": {
