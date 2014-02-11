@@ -38,3 +38,7 @@ info.files = [
 - **info.main_file** - absolute path to module main file
 - **info.module_path** - absolute path to module folder
 - **info.package_json** - module package.json object
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/AlexMost/gimme-deps/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
